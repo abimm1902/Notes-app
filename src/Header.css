@@ -1,0 +1,32 @@
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background-color: white;
+}
+
+.header h1 {
+  font-size: 26px;
+  color: #333;
+}
+
+.header input {
+  padding: 12px;
+  width: 250px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+
+@media (max-width: 768px) {
+  .header {
+    padding: 15px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .header input {
+    width: 100%;
+  }
+}

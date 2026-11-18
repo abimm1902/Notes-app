@@ -1,0 +1,13 @@
+
+.pinned-section {
+  margin: 20px;
+}
+
+.pinned-section h2 {
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.pinned-card {
+  max-width: 380px;
+}
