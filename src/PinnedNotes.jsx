@@ -2,28 +2,36 @@
 import "./PinnedNotes.css";
 import NoteCard from "./NoteCard";
 
-function PinnedNotes() {
-  const pinnedNote = {
-    id: 1,
-    title: "Important Project Task",
-    content: "Complete the Notes App UI and push the project to GitHub.",
-    category: "Work",
-    date: "18 Nov 2026",
-    color: "#fff0a8",
-  };
+function PinnedNotes(props) {
+  const pinnedNotes = props.notes.filter(
+    (note) => note.isPinned
+  );
+
 
   return (
     <section className="pinned-section">
-      <h2>📌 Pinned Notes</h2>
+      <h2>Pinned Notes</h2>
 
-      <div className="pinned-card">
-        <NoteCard
-          title={pinnedNote.title}
-          content={pinnedNote.content}
-          category={pinnedNote.category}
-          date={pinnedNote.date}
-          color={pinnedNote.color}
-        />
+    <div className="pinned-grid">
+        {pinnedNotes.length === 0 ? (
+          <p>No pinned notes yet</p>
+        ) : (
+          pinnedNotes.map((note) => (
+            <NoteCard
+              key={note.id}
+              id={note.id}
+              title={note.title}
+              content={note.content}
+              category={note.category}
+              date={note.date}
+              color={note.color}
+              isPinned={note.isPinned}
+              onPin={props.onPin}
+              onDelete={props.onDelete}
+              onEdit={props.onEdit}
+            />
+          ))
+        )}
       </div>
     </section>
   );

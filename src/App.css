@@ -50,3 +50,41 @@ body {
     padding: 12px;
   }
 }
+
+
+/* Tablet */
+@media (max-width: 768px) {
+  .main-layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .notes-grid,
+  .pinned-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .notes-grid,
+  .pinned-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .main-content {
+    padding: 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header input {
+    width: 100%;
+  }
+}

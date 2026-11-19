@@ -1,29 +1,35 @@
+
 import "./Sidebar.css";
 
-function Sidebar() {
+function Sidebar(props) {
+  const categories = ["All", "Work", "Personal", "Ideas"];
+
   return (
     <div className="sidebar">
-
       <h3>Categories</h3>
 
       <ul>
-        <li className="active">
-          All <span>6</span>
-        </li>
+        {categories.map((category) => {
+          const count =
+            category === "All"
+              ? props.notes.length
+              : props.notes.filter(
+                  (note) => note.category === category
+                ).length;
 
-        <li>
-          Work <span>2</span>
-        </li>
-
-        <li>
-          Personal <span>2</span>
-        </li>
-
-        <li>
-          Ideas <span>2</span>
-        </li>
+          return (
+            <li
+              key={category}
+              className={
+                props.selectedCategory === category ? "active" : ""
+              }
+              onClick={() => props.onCategoryChange(category)}
+            >
+              {category} <span>{count}</span>
+            </li>
+          );
+        })}
       </ul>
-
     </div>
   );
 }

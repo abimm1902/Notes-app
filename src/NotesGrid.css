@@ -26,3 +26,9 @@
     grid-template-columns: 1fr;
   }
 }
+.empty-message {
+  text-align: center;
+  padding: 30px;
+  color: #777;
+  font-size: 16px;
+}

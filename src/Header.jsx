@@ -1,13 +1,16 @@
+
 import "./Header.css";
 
-function Header() {
+function Header(props) {
   return (
     <header className="header">
       <h1>My Notes</h1>
 
       <input
         type="text"
-        placeholder=" 🔍Search your notes..."
+        placeholder="🔍 Search your notes..."
+        value={props.searchText}
+        onChange={(e) => props.onSearch(e.target.value)}
       />
     </header>
   );

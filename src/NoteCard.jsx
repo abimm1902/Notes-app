@@ -1,3 +1,4 @@
+
 import "./NoteCard.css";
 
 function NoteCard(props) {
@@ -6,10 +7,12 @@ function NoteCard(props) {
       className="note-card"
       style={{ backgroundColor: props.color }}
     >
-
       <div className="note-header">
         <h3>{props.title}</h3>
-        <span>📌</span>
+
+        <span onClick={() => props.onPin(props.id)}>
+          {props.isPinned ? "📌" : "📍"}
+        </span>
       </div>
 
       <p className="note-content">
@@ -24,11 +27,15 @@ function NoteCard(props) {
         <span>{props.date}</span>
 
         <div className="note-actions">
-          <span>✏️</span>
-          <span>🗑️</span>
+          <span onClick={() => props.onEdit(props.id)}>
+            ✏️
+          </span>
+
+          <span onClick={() => props.onDelete(props.id)}>
+            🗑️
+          </span>
         </div>
       </div>
-
     </div>
   );
 }
