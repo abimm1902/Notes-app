@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 import Header from "./Header";
@@ -8,114 +8,246 @@ import NoteForm from "./NoteForm";
 import NotesGrid from "./NotesGrid";
 import PinnedNotes from "./PinnedNotes";
 
-import initialNotes from "./data";
+import { getNotes, createNote, updateNote, deleteNote, } from "./api";
 
 function App() {
-  const [notes, setNotes] = useState(initialNotes);
+  // 1. State management
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const handleDelete = (id) => {
-  setNotes(notes.filter((note) => note.id !== id));
+  const [editingNote, setEditingNote] = useState(null);
+  const [searchText, setSearchText] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+
+
+  const [saving, setSaving] = useState(false);
+const [saveError, setSaveError] = useState(null); 
+
+
+  // 2. Fetch notes from API
+  useEffect(() => {
+    const fetchNotes = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const data = await getNotes();
+
+        // Convert API pinned property to isPinned
+        const formattedNotes = data.map((note) => ({
+          ...note,
+          isPinned: note.isPinned ?? note.pinned ?? false,
+        }));
+
+        setNotes(formattedNotes);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotes();
+  }, []);
+
+  // 3. Delete note (local update for now)
+  
+const handleDelete = async (id) => {
+  try {
+    setSaveError(null);
+
+    // Send DELETE request to JSON Server
+    await deleteNote(id);
+
+    // Update React state only after successful response
+    setNotes((previousNotes) =>
+      previousNotes.filter((note) => note.id !== id)
+    );
+
+  } catch (error) {
+    setSaveError(error.message);
+  }
 };
 
-const handlePin = (id) => {
-  setNotes(
-    notes.map((note) =>
-      note.id === id
-        ? { ...note, isPinned: !note.isPinned }
-        : note
-    )
-  );
-};
 
-
-const handleAddNote = (newNote) => {
-  const note = {
-    ...newNote,
-    id: Date.now(),
-    date: new Date().toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    }),
-    isPinned: false,
-  };
-
-  setNotes((previousNotes) => [...previousNotes, note]);
-};
-const [editingNote, setEditingNote] = useState(null);
-const handleEdit = (id) => {
+  // 4. Pin / Unpin note (local update for now)
+  
+const handlePin = async (id) => {
   const selectedNote = notes.find((note) => note.id === id);
 
-  setEditingNote(selectedNote);
-};
+  if (!selectedNote) return;
 
-const handleUpdateNote = (updatedNote) => {
-  setNotes((previousNotes) =>
-    previousNotes.map((note) =>
-      note.id === editingNote.id
-        ? { ...note, ...updatedNote }
-        : note
-    )
-  );
+  try {
+    setSaveError(null);
 
-  setEditingNote(null);
-};
+    const updatedNote = await updateNote(id, {
+      pinned: !selectedNote.isPinned,
+    });
 
-const [searchText, setSearchText] = useState("");
-const [selectedCategory, setSelectedCategory] = useState("All");
+    const formattedNote = {
+      ...updatedNote,
+      isPinned: updatedNote.pinned ?? false,
+    };
 
-const filteredNotes = notes.filter((note) => {
-  const matchesSearch =
-    note.title.toLowerCase().includes(searchText.toLowerCase()) ||
-    note.content.toLowerCase().includes(searchText.toLowerCase());
+    setNotes((previousNotes) =>
+      previousNotes.map((note) =>
+        note.id === id ? formattedNote : note
+      )
+    );
 
-  const matchesCategory =
-    selectedCategory === "All" ||
-    note.category === selectedCategory;
-
-  return matchesSearch && matchesCategory;
-});
-
-const handleCancelEdit = () => {
-  setEditingNote(null);
+  } catch (error) {
+    setSaveError(error.message);
+  }
 };
 
 
+  // 5. Add note (local update for now)
+  
+const handleAddNote = async (newNote) => {
+  try {
+    setSaving(true);
+    setSaveError(null);
+
+    const savedNote = await createNote({
+      ...newNote,
+      pinned: false,
+    });
+
+    const formattedNote = {
+      ...savedNote,
+      isPinned: savedNote.pinned ?? false,
+    };
+
+    setNotes((previousNotes) => [
+      ...previousNotes,
+      formattedNote,
+    ]);
+
+    return true;
+
+  } catch (error) {
+    setSaveError(error.message);
+    return false;
+
+  } finally {
+    setSaving(false);
+  }
+};
 
 
+  // 6. Edit note
+  const handleEdit = (id) => {
+    const selectedNote = notes.find((note) => note.id === id);
+    setEditingNote(selectedNote);
+  };
+
+  // 7. Update note (local update for now)
+  
+const handleUpdateNote = async (updatedNote) => {
+  try {
+    setSaving(true);
+    setSaveError(null);
+
+    const savedNote = await updateNote(
+      editingNote.id,
+      updatedNote
+    );
+
+    const formattedNote = {
+      ...savedNote,
+      isPinned: savedNote.pinned ?? savedNote.isPinned ?? false,
+    };
+
+    setNotes((previousNotes) =>
+      previousNotes.map((note) =>
+        note.id === editingNote.id ? formattedNote : note
+      )
+    );
+
+    setEditingNote(null);
+
+    return true;
+
+  } catch (error) {
+    setSaveError(error.message);
+    return false;
+
+  } finally {
+    setSaving(false);
+  }
+};
+
+
+  // 8. Cancel edit
+  const handleCancelEdit = () => {
+    setEditingNote(null);
+  };
+
+  // 9. Search and category filtering
+  const filteredNotes = notes.filter((note) => {
+    const matchesSearch =
+      note.title.toLowerCase().includes(searchText.toLowerCase()) ||
+      note.content.toLowerCase().includes(searchText.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "All" ||
+      note.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  // 10. Render UI
   return (
     <div className="app">
-     <Header
-  searchText={searchText}
-  onSearch={setSearchText}
-/>
+      <Header
+        searchText={searchText}
+        onSearch={setSearchText}
+      />
 
       <div className="main-layout">
-       <Sidebar
-  notes={notes}
-  selectedCategory={selectedCategory}
-  onCategoryChange={setSelectedCategory}
-/>
+        <Sidebar
+          notes={notes}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+        />
 
         <main className="main-content">
-          <NoteForm onAddNote={handleAddNote}
-          editingNote={editingNote} 
-           onUpdateNote={handleUpdateNote}
-           onCancelEdit={handleCancelEdit}/>
+          <NoteForm
+            onAddNote={handleAddNote}
+            editingNote={editingNote}
+            onUpdateNote={handleUpdateNote}
+            onCancelEdit={handleCancelEdit}
+            saving={saving}/>
+         {saveError && <p className="error-message">{saveError}</p>}
 
-       <PinnedNotes
-notes={filteredNotes}
-  onPin={handlePin}
-  onDelete={handleDelete}
-    onEdit={handleEdit}
-/>
+          {loading ? (
+            <h2>Loading...</h2>
+          ) : error ? (
+            <h2>Error: {error}</h2>
+          ) : notes.length === 0 ? (
+            <h2>No notes found. Create your first note!</h2>
+          ) : filteredNotes.length === 0 ? (
+            <h2>No matching notes found.</h2>
+          ) : (
+            <>
+              <PinnedNotes
+                notes={filteredNotes}
+                onPin={handlePin}
+                onDelete={handleDelete}
+                onEdit={handleEdit}
+              />
 
-  <NotesGrid
- notes={filteredNotes.filter((note) => !note.isPinned)}
-  onDelete={handleDelete}
-  onPin={handlePin}
-   onEdit={handleEdit}
-/>
+              <NotesGrid
+                notes={filteredNotes.filter(
+                  (note) => !note.isPinned
+                )}
+                onDelete={handleDelete}
+                onPin={handlePin}
+                onEdit={handleEdit}
+              />
+            </>
+          )}
         </main>
       </div>
     </div>
@@ -123,4 +255,3 @@ notes={filteredNotes}
 }
 
 export default App;
-

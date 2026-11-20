@@ -26,7 +26,9 @@ useEffect(() => {
   }
 }, [props.editingNote]);
 
-const handleSubmit = (e) => {
+
+
+const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!title.trim() || !content.trim() || !category) {
@@ -41,17 +43,28 @@ const handleSubmit = (e) => {
     color,
   };
 
-  if (props.editingNote) {
-    props.onUpdateNote(noteDetails);
-  } else {
-    props.onAddNote(noteDetails);
-  }
+  let success;
 
-  setTitle("");
-  setContent("");
-  setCategory("");
-  setColor("#d9c8ff");
+  try {
+    if (props.editingNote) {
+      success = await props.onUpdateNote(noteDetails);
+    } else {
+      success = await props.onAddNote(noteDetails);
+    }
+
+    // Reset form only if the operation succeeds
+    if (success === false) return;
+
+    setTitle("");
+    setContent("");
+    setCategory("");
+    setColor("#d9c8ff");
+
+  } catch (error) {
+    console.error("Failed to save note:", error);
+  }
 };
+
 
 
   return (
@@ -107,9 +120,19 @@ const handleSubmit = (e) => {
 ></span>
         </div>
       </div>
-<button type="submit" className="save-btn">
-   {props.editingNote ? "Save Changes" : "Save Note"}
+
+<button
+  type="submit"
+  className="save-btn"
+  disabled={props.saving}
+>
+  {props.saving
+    ? "Saving..."
+    : props.editingNote
+      ? "Save Changes"
+      : "Save Note"}
 </button>
+
 {props.editingNote && (
   <button
     type="button"

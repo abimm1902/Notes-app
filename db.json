@@ -1,0 +1,19 @@
+{
+  "notes": [
+    {
+      "id": "1",
+      "title": "Learn React",
+      "content": "Complete React fundamentals.",
+      "category": "Work",
+      "pinned": true
+    },
+    {
+      "id": "2",
+      "title": "Practice JavaScript",
+      "content": "Learn array methods.",
+      "category": "Personal",
+      "pinned": false
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
