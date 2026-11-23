@@ -1,8 +1,10 @@
-
+import "./App.css"; 
 import { useEffect, useState } from "react";
 import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 import Header from "./Header";
+
+
 import Home from "./Pages/Home";
 import NoteDetail from "./Pages/NoteDetail";
 import NewNote from "./Pages/NewNote";
@@ -24,7 +26,6 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Fetch notes when the page changes
   useEffect(() => {
     async function fetchAllNotes() {
       try {
@@ -92,59 +93,68 @@ function App() {
   }
 
   return (
-    <>
+    <div className="app">
       <Header />
 
-      {error && <p className="error-message">{error}</p>}
+      <div className="main-layout">
+        
+        <main className="main-content">
+          {error && (
+            <p className="error-message">{error}</p>
+          )}
 
-      {loading && <p>Loading notes...</p>}
+          {loading ? (
+            <p>Loading notes...</p>
+          ) : (
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <Home
+                    notes={notes}
+                    onPin={handlePin}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                }
+              />
 
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              notes={notes}
-              onPin={handlePin}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          }
-        />
+              <Route
+                path="/note/:id"
+                element={<NoteDetail />}
+              />
 
-        <Route
-          path="/note/:id"
-          element={<NoteDetail />}
-        />
+              <Route
+                path="/new"
+                element={<NewNote />}
+              />
 
-        <Route
-          path="/new"
-          element={<NewNote />}
-        />
+              <Route
+                path="/edit/:id"
+                element={<EditNote />}
+              />
 
-        <Route
-          path="/edit/:id"
-          element={<EditNote />}
-        />
+              <Route
+                path="/pinned"
+                element={
+                  <PinnedNotesPage
+                    notes={notes}
+                    onPin={handlePin}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                  />
+                }
+              />
 
-        <Route
-          path="/pinned"
-          element={
-            <PinnedNotesPage
-              notes={notes}
-              onPin={handlePin}
-              onEdit={handleEdit}
-              onDelete={handleDelete}
-            />
-          }
-        />
-
-        <Route
-          path="*"
-          element={<NotFound />}
-        />
-      </Routes>
-    </>
+              <Route
+                path="*"
+                element={<NotFound />}
+              />
+            </Routes>
+          )}
+        </main>
+      </div>
+    </div>
   );
 }
 

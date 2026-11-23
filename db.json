@@ -1,15 +1,6 @@
 {
   "notes": [
     {
-      "id": "1",
-      "title": "Learn React",
-      "content": "Complete React fundamentals.",
-      "category": "Work",
-      "pinned": true,
-      "isPinned": true,
-      "color": "#c8f2d0"
-    },
-    {
       "id": "2",
       "title": "Practice JavaScript",
       "content": "Learn array methods.",
@@ -31,6 +22,13 @@
       "category": "Ideas",
       "color": "#fff0a8",
       "id": "1fE3rVxT0XM"
+    },
+    {
+      "title": "hgfv jn ;o ovd",
+      "content": "fvcd we[eo fk ",
+      "category": "Work",
+      "color": "#ffcbd8",
+      "id": "-OsY-rehwtA"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

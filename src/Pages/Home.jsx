@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-
+import "./Home.css";
 import Sidebar from "../Sidebar";
 import NotesGrid from "../NotesGrid";
 import PinnedNotes from "../PinnedNotes";

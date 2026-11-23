@@ -12,28 +12,38 @@ body {
 
 .app {
   min-height: 100vh;
+  width: 100%;
 }
+
+/* Main layout */
 
 .main-layout {
   display: flex;
+  flex-direction: row;
   align-items: stretch;
   width: 100%;
+  min-height: calc(100vh - 60px);
 }
+
+/* Sidebar */
 
 .sidebar {
   width: 240px;
   min-width: 240px;
-  min-height: calc(100vh - 80px);
   flex-shrink: 0;
 }
+
+/* Remaining content */
 
 .main-content {
   flex: 1;
   min-width: 0;
   padding: 20px;
+  overflow-x: hidden;
 }
 
-/* Mobile responsive */
+/* Tablet and mobile */
+
 @media (max-width: 768px) {
   .main-layout {
     flex-direction: column;
@@ -42,24 +52,11 @@ body {
   .sidebar {
     width: 100%;
     min-width: 100%;
-    min-height: auto;
   }
 
   .main-content {
     width: 100%;
     padding: 12px;
-  }
-}
-
-
-/* Tablet */
-@media (max-width: 768px) {
-  .main-layout {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
   }
 
   .notes-grid,
@@ -68,15 +65,12 @@ body {
   }
 }
 
-/* Mobile */
+/* Small mobile */
+
 @media (max-width: 480px) {
   .notes-grid,
   .pinned-grid {
     grid-template-columns: 1fr;
-  }
-
-  .main-content {
-    padding: 12px;
   }
 
   .header {
