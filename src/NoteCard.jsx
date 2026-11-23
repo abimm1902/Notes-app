@@ -1,4 +1,4 @@
-
+import { Link } from "react-router-dom";
 import "./NoteCard.css";
 
 function NoteCard(props) {
@@ -19,6 +19,10 @@ function NoteCard(props) {
         {props.content}
       </p>
 
+        <Link to={`/note/${props.id}`}>
+        View Details
+      </Link>
+      
       <div className="note-category">
         {props.category}
       </div>

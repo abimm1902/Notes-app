@@ -5,14 +5,32 @@
       "title": "Learn React",
       "content": "Complete React fundamentals.",
       "category": "Work",
-      "pinned": true
+      "pinned": true,
+      "isPinned": true,
+      "color": "#c8f2d0"
     },
     {
       "id": "2",
       "title": "Practice JavaScript",
       "content": "Learn array methods.",
       "category": "Personal",
-      "pinned": false
+      "pinned": false,
+      "isPinned": false,
+      "color": "#d9c8ff"
+    },
+    {
+      "title": "sdxc",
+      "content": "dcfz rgvrgv dfhnb   sfdc ",
+      "category": "Work",
+      "color": "#ffcbd8",
+      "id": "FfuMxQaBUCE"
+    },
+    {
+      "title": " jhc  dlkfv dv kl ",
+      "content": "fvfv  fvvfgv thbg tb ,vfgv asdfc rv .",
+      "category": "Ideas",
+      "color": "#fff0a8",
+      "id": "1fE3rVxT0XM"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

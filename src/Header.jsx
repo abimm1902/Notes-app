@@ -1,17 +1,40 @@
 
+import { NavLink, Link } from "react-router-dom";
 import "./Header.css";
 
-function Header(props) {
+function Header() {
   return (
     <header className="header">
-      <h1>My Notes</h1>
 
-      <input
-        type="text"
-        placeholder="🔍 Search your notes..."
-        value={props.searchText}
-        onChange={(e) => props.onSearch(e.target.value)}
-      />
+      <h2 className="logo">Notes App</h2>
+
+      <nav className="nav-links">
+
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            isActive ? "nav-link active" : "nav-link"
+          }
+          end
+        >
+          Home
+        </NavLink>
+
+        <NavLink
+          to="/pinned"
+          className={({ isActive }) =>
+            isActive ? "nav-link active" : "nav-link"
+          }
+        >
+          Pinned
+        </NavLink>
+
+        <Link to="/new" className="new-note-btn">
+          + New Note
+        </Link>
+
+      </nav>
+
     </header>
   );
 }

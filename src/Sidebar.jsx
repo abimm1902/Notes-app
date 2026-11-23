@@ -12,8 +12,8 @@ function Sidebar(props) {
         {categories.map((category) => {
           const count =
             category === "All"
-              ? props.notes.length
-              : props.notes.filter(
+              ? (props.notes || []).length
+              :(props.notes || []).filter(
                   (note) => note.category === category
                 ).length;
 

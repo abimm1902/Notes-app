@@ -1,256 +1,150 @@
 
-import { useState, useEffect } from "react";
-import "./App.css";
+import { useEffect, useState } from "react";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 
 import Header from "./Header";
-import Sidebar from "./Sidebar";
-import NoteForm from "./NoteForm";
-import NotesGrid from "./NotesGrid";
-import PinnedNotes from "./PinnedNotes";
+import Home from "./Pages/Home";
+import NoteDetail from "./Pages/NoteDetail";
+import NewNote from "./Pages/NewNote";
+import EditNote from "./Pages/EditNote";
+import PinnedNotesPage from "./Pages/PinnedNotesPage";
+import NotFound from "./Pages/NotFound";
 
-import { getNotes, createNote, updateNote, deleteNote, } from "./api";
+import {
+  getNotes,
+  updateNote,
+  deleteNote,
+} from "./api";
 
 function App() {
-  // 1. State management
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
 
-  const [editingNote, setEditingNote] = useState(null);
-  const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const location = useLocation();
+  const navigate = useNavigate();
 
-
-  const [saving, setSaving] = useState(false);
-const [saveError, setSaveError] = useState(null); 
-
-
-  // 2. Fetch notes from API
+  // Fetch notes when the page changes
   useEffect(() => {
-    const fetchNotes = async () => {
+    async function fetchAllNotes() {
       try {
         setLoading(true);
-        setError(null);
+        setError("");
 
         const data = await getNotes();
-
-        // Convert API pinned property to isPinned
-        const formattedNotes = data.map((note) => ({
-          ...note,
-          isPinned: note.isPinned ?? note.pinned ?? false,
-        }));
-
-        setNotes(formattedNotes);
+        setNotes(data);
       } catch (error) {
-        setError(error.message);
+        console.error(error);
+        setError("Unable to load notes. Check JSON Server.");
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    fetchNotes();
-  }, []);
+    fetchAllNotes();
+  }, [location.pathname]);
 
-  // 3. Delete note (local update for now)
-  
-const handleDelete = async (id) => {
-  try {
-    setSaveError(null);
-
-    // Send DELETE request to JSON Server
-    await deleteNote(id);
-
-    // Update React state only after successful response
-    setNotes((previousNotes) =>
-      previousNotes.filter((note) => note.id !== id)
+  // Pin and unpin note
+  async function handlePin(id) {
+    const note = notes.find(
+      (item) => String(item.id) === String(id)
     );
 
-  } catch (error) {
-    setSaveError(error.message);
+    if (!note) return;
+
+    try {
+      const updatedNote = await updateNote(id, {
+        isPinned: !note.isPinned,
+      });
+
+      setNotes((prevNotes) =>
+        prevNotes.map((item) =>
+          String(item.id) === String(id)
+            ? updatedNote
+            : item
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to update pin");
+    }
   }
-};
 
+  // Delete note
+  async function handleDelete(id) {
+    try {
+      await deleteNote(id);
 
-  // 4. Pin / Unpin note (local update for now)
-  
-const handlePin = async (id) => {
-  const selectedNote = notes.find((note) => note.id === id);
-
-  if (!selectedNote) return;
-
-  try {
-    setSaveError(null);
-
-    const updatedNote = await updateNote(id, {
-      pinned: !selectedNote.isPinned,
-    });
-
-    const formattedNote = {
-      ...updatedNote,
-      isPinned: updatedNote.pinned ?? false,
-    };
-
-    setNotes((previousNotes) =>
-      previousNotes.map((note) =>
-        note.id === id ? formattedNote : note
-      )
-    );
-
-  } catch (error) {
-    setSaveError(error.message);
+      setNotes((prevNotes) =>
+        prevNotes.filter(
+          (note) => String(note.id) !== String(id)
+        )
+      );
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete note");
+    }
   }
-};
 
-
-  // 5. Add note (local update for now)
-  
-const handleAddNote = async (newNote) => {
-  try {
-    setSaving(true);
-    setSaveError(null);
-
-    const savedNote = await createNote({
-      ...newNote,
-      pinned: false,
-    });
-
-    const formattedNote = {
-      ...savedNote,
-      isPinned: savedNote.pinned ?? false,
-    };
-
-    setNotes((previousNotes) => [
-      ...previousNotes,
-      formattedNote,
-    ]);
-
-    return true;
-
-  } catch (error) {
-    setSaveError(error.message);
-    return false;
-
-  } finally {
-    setSaving(false);
+  // Navigate to edit page
+  function handleEdit(id) {
+    navigate(`/edit/${id}`);
   }
-};
 
-
-  // 6. Edit note
-  const handleEdit = (id) => {
-    const selectedNote = notes.find((note) => note.id === id);
-    setEditingNote(selectedNote);
-  };
-
-  // 7. Update note (local update for now)
-  
-const handleUpdateNote = async (updatedNote) => {
-  try {
-    setSaving(true);
-    setSaveError(null);
-
-    const savedNote = await updateNote(
-      editingNote.id,
-      updatedNote
-    );
-
-    const formattedNote = {
-      ...savedNote,
-      isPinned: savedNote.pinned ?? savedNote.isPinned ?? false,
-    };
-
-    setNotes((previousNotes) =>
-      previousNotes.map((note) =>
-        note.id === editingNote.id ? formattedNote : note
-      )
-    );
-
-    setEditingNote(null);
-
-    return true;
-
-  } catch (error) {
-    setSaveError(error.message);
-    return false;
-
-  } finally {
-    setSaving(false);
-  }
-};
-
-
-  // 8. Cancel edit
-  const handleCancelEdit = () => {
-    setEditingNote(null);
-  };
-
-  // 9. Search and category filtering
-  const filteredNotes = notes.filter((note) => {
-    const matchesSearch =
-      note.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      note.content.toLowerCase().includes(searchText.toLowerCase());
-
-    const matchesCategory =
-      selectedCategory === "All" ||
-      note.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
-  });
-
-  // 10. Render UI
   return (
-    <div className="app">
-      <Header
-        searchText={searchText}
-        onSearch={setSearchText}
-      />
+    <>
+      <Header />
 
-      <div className="main-layout">
-        <Sidebar
-          notes={notes}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
+      {error && <p className="error-message">{error}</p>}
+
+      {loading && <p>Loading notes...</p>}
+
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <Home
+              notes={notes}
+              onPin={handlePin}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          }
         />
 
-        <main className="main-content">
-          <NoteForm
-            onAddNote={handleAddNote}
-            editingNote={editingNote}
-            onUpdateNote={handleUpdateNote}
-            onCancelEdit={handleCancelEdit}
-            saving={saving}/>
-         {saveError && <p className="error-message">{saveError}</p>}
+        <Route
+          path="/note/:id"
+          element={<NoteDetail />}
+        />
 
-          {loading ? (
-            <h2>Loading...</h2>
-          ) : error ? (
-            <h2>Error: {error}</h2>
-          ) : notes.length === 0 ? (
-            <h2>No notes found. Create your first note!</h2>
-          ) : filteredNotes.length === 0 ? (
-            <h2>No matching notes found.</h2>
-          ) : (
-            <>
-              <PinnedNotes
-                notes={filteredNotes}
-                onPin={handlePin}
-                onDelete={handleDelete}
-                onEdit={handleEdit}
-              />
+        <Route
+          path="/new"
+          element={<NewNote />}
+        />
 
-              <NotesGrid
-                notes={filteredNotes.filter(
-                  (note) => !note.isPinned
-                )}
-                onDelete={handleDelete}
-                onPin={handlePin}
-                onEdit={handleEdit}
-              />
-            </>
-          )}
-        </main>
-      </div>
-    </div>
+        <Route
+          path="/edit/:id"
+          element={<EditNote />}
+        />
+
+        <Route
+          path="/pinned"
+          element={
+            <PinnedNotesPage
+              notes={notes}
+              onPin={handlePin}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
+          }
+        />
+
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
+      </Routes>
+    </>
   );
 }
 

@@ -69,8 +69,7 @@ const handleSubmit = async (e) => {
 
   return (
    <form className="note-form" onSubmit={handleSubmit}>
-      <h2>Add a New Note</h2>
-
+    <h2>{props.editingNote ? "Edit Note" : "Add a New Note"}</h2>
       <input
         type="text"
         placeholder="Enter note title"
